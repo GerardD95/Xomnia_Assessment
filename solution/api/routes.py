@@ -6,14 +6,15 @@ from flask import Blueprint, render_template_string, request
 from queries import get_distinct_ship_count, get_avg_speed_by_hour, get_max_min_wind_speed, get_join_ship_weather_query
 from query_executor import LocalQueryExecutor, RemoteQueryExecutor
 from utils import get_plot, is_valid_date, DeviceID
-from config import LOCAL_EXECUTION
+from config import LOCAL_EXECUTION, SOURCE_TYPE, SOURCE_PATH
 
 logging.basicConfig(level=logging.INFO)
 routes = Blueprint('routes', __name__)
 
-def execute_query(query: str) -> pd.DataFrame:
+def execute_query(query: str, params: tuple = ()) -> pd.DataFrame:
     if LOCAL_EXECUTION:
-        return LocalQueryExecutor().execute_query(query)
+        executor = LocalQueryExecutor(SOURCE_TYPE, SOURCE_PATH)
+        return executor.execute_query(query, params)
     else:
         return RemoteQueryExecutor(os.getenv("REMOTE_BASE_URL")).execute_query(query)
 
@@ -31,8 +32,8 @@ def get_avg_speed():
         return "Invalid date format. Expected YYYY-MM-DD.", 400
     date = datetime.strptime(date, "%Y-%m-%d").date()
     logging.info(f"Getting average ship speeds by hour for date: {date}")
-    query = get_avg_speed_by_hour(date)
-    df = execute_query(query)
+    query = get_avg_speed_by_hour()
+    df = execute_query(query, (date,))
     return df.to_json(orient="records")
 
 @routes.route('/get-max-min-wind-speed')
@@ -43,8 +44,8 @@ def get_wind_speed():
     except KeyError:
         return "Invalid device_id. Expected 'DEVICE_ST_1A2090' or 'DEVICE_0001'.", 400
     logging.info(f"Getting max and min wind speed for device: {device_id.value}")
-    query = get_max_min_wind_speed(device_id.value)
-    df = execute_query(query)
+    query = get_max_min_wind_speed()
+    df = execute_query(query, (device_id.value,))
     return df.to_json(orient="records")
 
 @routes.route('/get-weather-conditions-along-route')
@@ -59,8 +60,8 @@ def get_weather_conditions_along_route():
         return "Invalid date format. Expected YYYY-MM-DD.", 400
     date = datetime.strptime(date, "%Y-%m-%d").date()
     logging.info(f"Getting weather conditions along route for device: {device_id.value}, date: {date}") 
-    query = get_join_ship_weather_query(device_id.value, date)
-    df = execute_query(query) 
+    query = get_join_ship_weather_query()
+    df = execute_query(query, (device_id.value, date)) 
     if df.empty:
         return "No data found for the given parameters.", 404
     fig = get_plot(df, device_id.value, date)

@@ -3,18 +3,18 @@ def get_distinct_ship_count() -> str:
     query = "SELECT COUNT(DISTINCT device_id) AS ship_count FROM raw_messages"
     return query
 
-def get_avg_speed_by_hour(date: str) -> str:
+def get_avg_speed_by_hour() -> str:
     """Avg speed for all available ships for each hour of the date: {date}"""
     query = f"""
         SELECT device_id, strftime(datetime, '%H') AS hour, AVG(spd_over_grnd) AS avg_speed
         FROM raw_messages
-        WHERE strftime(datetime, '%Y-%m-%d') = '{date}'
+        WHERE strftime(datetime, '%Y-%m-%d') = ?
         GROUP BY 1,2
         ORDER BY 1,2
     """
     return query
 
-def get_max_min_wind_speed(device_id: str) -> str:
+def get_max_min_wind_speed() -> str:
     """Max & min wind speed for every available day for ship: {device_id}"""
     query = f"""
         SELECT 
@@ -28,13 +28,13 @@ def get_max_min_wind_speed(device_id: str) -> str:
                 ON 
             strftime('%Y-%m-%d', s.datetime) = strftime('%Y-%m-%d', w.timestamp_local)
         WHERE 
-            s.device_id = '{device_id}'
+            s.device_id = ?
         GROUP BY strftime('%Y-%m-%d', s.datetime)
         ORDER BY strftime('%Y-%m-%d', s.datetime)
     """
     return query
 
-def get_join_ship_weather_query(device_id: str, date: str) -> str:
+def get_join_ship_weather_query() -> str:
     """
         A way to visualize full weather conditions across route of the ship: {device_id}, for date: {date}.
         (example fields: general description, temperature, wind speed)
@@ -66,6 +66,6 @@ def get_join_ship_weather_query(device_id: str, date: str) -> str:
             AND ROUND(s.lat, 4) = ROUND(w.lat, 4)
             AND ROUND(s.lon, 4) = ROUND(w.lon, 4)
         WHERE 
-            s.device_id = '{device_id}'
-            AND strftime(s.datetime, '%Y-%m-%d') = '{date}'
+            s.device_id = ?
+            AND strftime(s.datetime, '%Y-%m-%d') = ?
     """

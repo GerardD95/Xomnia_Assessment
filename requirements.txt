@@ -1,5 +1,0 @@
-pandas
-duckdb
-plotly
-flask
-python-dotenv

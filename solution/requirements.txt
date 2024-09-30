@@ -1,0 +1,7 @@
+pandas
+duckdb
+plotly
+flask
+python-dotenv
+pyspark
+sqlalchemy

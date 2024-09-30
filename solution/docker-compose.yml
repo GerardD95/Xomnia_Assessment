@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  #############
+  ### Spark ###
+  #############
+  spark-master:
+    image: bitnami/spark:latest
+    environment:
+      SPARK_PUBLIC_DNS: localhost
+      SPARK_LOCAL_IP: 0.0.0.0
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+  spark-worker:
+    image: bitnami/spark:latest
+    depends_on:
+      - spark-master
+    environment:
+      SPARK_MODE: worker
+      SPARK_WORKER_CORES: 4
+      SPARK_WORKER_MEMORY: 4g
+      SPARK_MASTER_URL: spark://spark-master:7077
+      SPARK_PUBLIC_DNS: localhost
+      SPARK_LOCAL_IP: 0.0.0.0
+    ports:
+      - "8081:8081"
+    
+  ################
+  ### Storage ###
+  ################
+  minio:
+    image: minio/minio
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    ports:
+      - "9000:9000"  # S3 API
+      - "9001:9001"  # MinIO Console
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+  ################
+  ### Web App ###
+  ################
+  # flask-app:
+  #   build: /api/.
+  #   ports:
+  #     - "5000:5000"
+  #   environment:
+  #     MINIO_ACCESS_KEY: minio
+  #     MINIO_SECRET_KEY: minio123
+  #   depends_on:
+  #     - spark-master
+  #     - minio
+
+volumes:
+  minio_data:
