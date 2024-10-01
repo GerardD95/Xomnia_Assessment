@@ -38,3 +38,8 @@ variable "home_ip" {
   description = "The IP address to whitelist for the database"
   type        = string
 }
+
+variable "image_tag" {
+  description = "The tag of the Docker image to deploy"
+  type        = string
+}

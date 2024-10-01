@@ -49,13 +49,13 @@ resource "google_sql_database_instance" "main" {
 # Create cloud run service
 resource "google_cloud_run_service" "default" {
   name       = "my-service"
-  depends_on = [google_sql_database_instance.main]
+  depends_on = [google_sql_database_instance.main, google_project_service.cloud_run]
   location   = var.region
 
   template {
     spec {
       containers {
-        image = "${var.region}-docker.pkg.dev/${var.project_id}/main-repo/shipping-api:latest"
+        image = "${var.region}-docker.pkg.dev/${var.project_id}/main-repo/shipping-api:${var.image_tag}"
 
         env {
           name  = "DB_URL"
