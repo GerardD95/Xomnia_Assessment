@@ -1,7 +1,10 @@
-from datetime import datetime
 from enum import Enum
+from datetime import datetime
+
 import pandas as pd
 import plotly.express as px
+from sqlalchemy import create_engine
+from config import DB_PASS, DB_HOST
 
 
 class DeviceID(Enum):
@@ -38,4 +41,9 @@ def get_plot(df: pd.DataFrame, device_id: str, date: str) -> px.scatter_mapbox:
     )
     fig.update_layout(width=1000, height=800)
     return fig
-    
+
+def get_google_cloud_sql_connection(db_url: str = None):
+    if not db_url:
+        db_url = f'postgresql+psycopg2://postgres:{DB_PASS}@{DB_HOST}:5432/postgres'
+    engine = create_engine(db_url)
+    return engine.connect()

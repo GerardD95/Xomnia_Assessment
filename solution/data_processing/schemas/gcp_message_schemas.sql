@@ -30,20 +30,21 @@
 -- );
 
 CREATE TABLE IF NOT EXISTS raw_messages (
-    device_id VARCHAR,
-    datetime TIMESTAMP,
-    address_ip VARCHAR,
-    address_port INTEGER,
-    original_message_id VARCHAR,
-    status VARCHAR,
-    lat DOUBLE,
-    lat_dir VARCHAR,
-    lon DOUBLE,
-    lon_dir VARCHAR,
-    spd_over_grnd DOUBLE,
-    true_course DOUBLE,
+    device_id VARCHAR NOT NULL,
+    datetime TIMESTAMP NOT NULL,
+    address_ip VARCHAR NOT NULL,
+    address_port INTEGER NOT NULL,
+    original_message_id VARCHAR NOT NULL,
+    status VARCHAR NOT NULL,
+    lat DOUBLE PRECISION NOT NULL,
+    lat_dir VARCHAR NOT NULL,
+    lon DOUBLE PRECISION NOT NULL,
+    lon_dir VARCHAR NOT NULL,
+    spd_over_grnd DOUBLE PRECISION NOT NULL,
+    true_course DOUBLE PRECISION,
     datestamp INTEGER,
-    mag_variation DOUBLE,
+    mag_variation DOUBLE PRECISION,
     mag_var_dir VARCHAR,
     PRIMARY KEY (device_id, original_message_id)
-)
+);
+

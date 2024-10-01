@@ -1,0 +1,35 @@
+version: '3'
+
+tasks:
+  run-docker-services:
+    dir: data_processing
+    cmds:
+      - |
+        docker-compose -p xomniadeassessment up -d
+
+  stop-docker-services:
+    dir: data_processing
+    cmds:
+      - |
+        docker-compose -p xomniadeassessment down
+
+  start-stream-processor-*:
+    dir: data_processing
+    deps:
+      - run-docker-services
+    vars:
+      MODE: '{{index .MATCH 0}}'
+    cmds:
+      - |
+        export PYTHONPATH=$(pwd) && \
+        spark-submit \
+        --packages org.apache.hadoop:hadoop-aws:3.3.1,com.amazonaws:aws-java-sdk-bundle:1.11.901,org.postgresql:postgresql:42.2.20 \
+        scripts/spark_streaming_job.py {{.MODE}}
+
+  ingest-weather-data-*:
+    dir: data_processing
+    vars:
+      MODE: '{{index .MATCH 0}}'
+    cmds:
+      - |
+        python -m scripts.ingest_weather_data {{.MODE}}

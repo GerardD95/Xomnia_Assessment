@@ -1,24 +1,8 @@
 version: '3'
 
-tasks:
-  run-docker-services:
-    cmds:
-      - |
-        docker-compose -p xomniadeassessment up -d
+dotenv: ['.env']
 
-  stop-docker-services:
-    cmds:
-      - |
-        docker-compose -p xomniadeassessment down
- 
-  start-stream-processor-*:
-    dir: data_processing
-    deps:
-      - run-docker-services
-    vars:
-      MODE: '{{index .MATCH 0}}'
-    cmds:
-      - |
-        spark-submit \
-        --packages org.apache.hadoop:hadoop-aws:3.3.1,com.amazonaws:aws-java-sdk-bundle:1.11.901 \
-        spark_streaming_job.py {{.MODE}}
+includes:
+  data_processing: data_processing/Taskfile.yaml
+  infra: infra/Taskfile.yaml
+  api: api/Taskfile.yaml

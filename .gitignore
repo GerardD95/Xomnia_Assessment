@@ -5,3 +5,9 @@ data/
 .vscode/
 __pycache__
 *.db
+*.tfstate
+*.tfstate.backup
+*.tfplan
+tfplan
+.terraform.lock.hcl
+.terraform/

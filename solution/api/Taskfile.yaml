@@ -1,0 +1,32 @@
+version: '3'
+
+tasks:
+  build-api:
+    dir: api
+    cmds:
+      - docker buildx build --platform linux/amd64 -t $TF_VAR_region-docker.pkg.dev/$TF_VAR_project_id/main-repo/shipping-api:latest .
+
+  push-api:
+    deps:
+      - build-api
+    cmds:
+      - docker push $TF_VAR_region-docker.pkg.dev/$TF_VAR_project_id/main-repo/shipping-api:latest
+
+  stop-api-local:
+    cmds:
+      - docker stop shipping-api-container || true
+      - docker rm shipping-api-container || true 
+
+  run-api-local:
+    deps:
+      - build-api
+      - stop-api-local
+    cmds:
+      - |
+        docker run -d -p 8080:8080 \
+          --name shipping-api-container \
+          -e LOCAL_EXECUTION=$LOCAL_EXECUTION \
+          -e SOURCE_TYPE=$SOURCE_TYPE \
+          -e SOURCE_PATH=$SOURCE_PATH \
+          -v /Users/gerard/Coding/Assessments/Xomnia\ DE\ Assessment/solution/local_duckdb.db:/app/solution/local_duckdb.db \
+          $TF_VAR_region-docker.pkg.dev/$TF_VAR_project_id/main-repo/shipping-api:latest

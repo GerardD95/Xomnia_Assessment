@@ -10,8 +10,9 @@ services:
       SPARK_PUBLIC_DNS: localhost
       SPARK_LOCAL_IP: 0.0.0.0
     ports:
-      - "8080:8080"
+      - "8082:8080"
       - "7077:7077"
+
   spark-worker:
     image: bitnami/spark:latest
     depends_on:
@@ -24,7 +25,7 @@ services:
       SPARK_PUBLIC_DNS: localhost
       SPARK_LOCAL_IP: 0.0.0.0
     ports:
-      - "8081:8081"
+      - "8083:8081"
     
   ################
   ### Storage ###
@@ -40,20 +41,6 @@ services:
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
-
-  ################
-  ### Web App ###
-  ################
-  # flask-app:
-  #   build: /api/.
-  #   ports:
-  #     - "5000:5000"
-  #   environment:
-  #     MINIO_ACCESS_KEY: minio
-  #     MINIO_SECRET_KEY: minio123
-  #   depends_on:
-  #     - spark-master
-  #     - minio
 
 volumes:
   minio_data:

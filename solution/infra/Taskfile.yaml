@@ -13,14 +13,14 @@ tasks:
     deps:
       - registry_init
     cmds:
-      - terraform plan -out=tfplan
+      - terraform plan -out=plans/tfplan
     
   registry_deploy:
     dir: infra/artifact_registry
     deps:
       - registry_build
     cmds:
-      - terraform apply tfplan
+      - terraform apply plans/tfplan
 
   registry_destroy:
     dir: infra/artifact_registry
@@ -38,14 +38,14 @@ tasks:
     deps:
       - infra_init
     cmds:
-      - terraform plan -out=tfplan
+      - terraform plan -out=plans/tfplan
 
   infra_deploy:
     dir: infra/application_infra
     deps:
       - infra_build
     cmds:
-      - terraform apply tfplan
+      - terraform apply plans/tfplan
 
   infra_destroy:
     dir: infra/application_infra
