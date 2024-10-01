@@ -1,0 +1,59 @@
+version: '3'
+
+
+tasks:
+  # Artifact Registry
+  registry_init:
+    dir: infra/artifact_registry
+    cmds:
+      - terraform init
+
+  registry_build:
+    dir: infra/artifact_registry
+    deps:
+      - registry_init
+    cmds:
+      - terraform plan -out=tfplan
+    
+  registry_deploy:
+    dir: infra/artifact_registry
+    deps:
+      - registry_build
+    cmds:
+      - terraform apply tfplan
+
+  registry_destroy:
+    dir: infra/artifact_registry
+    cmds:
+      - terraform destroy -auto-approve
+
+  # Application Infra
+  infra_init:
+    dir: infra/application_infra
+    cmds:
+      - terraform init
+  
+  infra_build:
+    dir: infra/application_infra
+    deps:
+      - infra_init
+    cmds:
+      - terraform plan -out=tfplan
+
+  infra_deploy:
+    dir: infra/application_infra
+    deps:
+      - infra_build
+    cmds:
+      - terraform apply tfplan
+
+  infra_destroy:
+    dir: infra/application_infra
+    cmds:
+      - terraform destroy -auto-approve
+
+  # Destroy all
+  destroy_all:
+    deps:
+      - infra_destroy
+      - registry_destroy
