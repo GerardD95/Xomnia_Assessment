@@ -4,7 +4,7 @@ import logging
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import *
 
-from utils.utils import log_new_file, create_tables_if_not_exist
+from utils.utils import log_new_file
 from data_processor import process_data
 from write_strategies import ConsoleWriteStrategy, DuckDBWriteStrategy, GoogleCloudSQLWriteStrategy, WriteContext
 from schemas.pyspark_schemas import raw_message_schema
@@ -55,9 +55,10 @@ def get_stream_writer(df: DataFrame, context: WriteContext, checkpnt_enabled: bo
         .outputMode("append") \
         .foreachBatch(log_new_file) \
         .foreachBatch(lambda batch_df, batch_id: normalize_and_write(batch_df, batch_id, context))
-    checkpoint_path = "s3a://test/checkpoints" if sys.argv[1].lower() == "cloud" else None
-    if checkpoint_path and checkpnt_enabled:
+    if checkpnt_enabled:
+        checkpoint_path = "s3a://test/checkpoints"
         query = query.option("checkpointLocation", checkpoint_path) 
+
     return query
 
 def main(context: WriteContext):
@@ -70,22 +71,17 @@ def main(context: WriteContext):
     query.awaitTermination()
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        logging.error("Usage: spark_streaming_job.py <console|localdb|cloud>")
-        sys.exit(1)
-
     write_strategy_map = {
         "console": ConsoleWriteStrategy,
         "localdb": DuckDBWriteStrategy,
         "cloud": GoogleCloudSQLWriteStrategy
     }
 
-    strategy_key = sys.argv[1].lower()
-    if strategy_key not in write_strategy_map:
+    if len(sys.argv) < 2 or sys.argv[1].lower() not in write_strategy_map:
         logging.error("Usage: spark_streaming_job.py <console|localdb|cloud>")
         sys.exit(1)
-
-    create_tables_if_not_exist(strategy_key)
-
+    
+    strategy_key = sys.argv[1].lower()
     write_strategy = write_strategy_map[strategy_key]()
+    write_strategy.create_tables()
     main(WriteContext(write_strategy))
