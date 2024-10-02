@@ -18,7 +18,7 @@ Technology used:
     - TF_VAR_db_user (up to you)
     - TF_VAR_db_pass (up to you)
     - TF_VAR_home_ip (your public ip)
-    - DB_HOST_IP (Only for running locally. You'll receive it after deploying the infra)
+    - DB_HOST_IP
 2. Docker
 3. Taskfile=>3.39.2
 
@@ -27,11 +27,12 @@ Technology used:
 2. run `task infra:registry_deploy`
 3. run `task api:push-api`
 4. run `task infra:infra_deploy` 
-5. run `task data_processing:run-docker-services`
-6. go to `http://localhost:9001` (login: minio, minio123) and create a bucket called `test`, a folder called `shipping_data` and upload the `raw_messages.csv` file into the folder.
-7. run `task data_processing:ingest-weather-data-gcp`
-8. run `task data_processing:start-stream-processor-cloud`
-9. find your google cloud run URL and go to one of the following endpoints:
+5. copy the value of cloud_sql_public_ip shown in your terminal after the deployment is done and set the DB_HOST_IP environment variable in your `.env` file with it.
+6. run `task data_processing:run-docker-services`
+7. go to `http://localhost:9001` (login: minio, minio123) and create a bucket called `test`, a folder called `shipping_data` and upload the `raw_messages.csv` file into the folder.
+8. run `task data_processing:ingest-weather-data-gcp`
+9. run `task data_processing:start-stream-processor-cloud`
+10. find your google cloud run URL and go to one of the following endpoints:
     - `/get-distinct-ship-count`
     - `/get-avg-speed-by-hour`
     - `/get-max-min-wind-speed`

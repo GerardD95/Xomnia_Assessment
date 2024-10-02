@@ -6,7 +6,7 @@ data/
 __pycache__
 *.db
 *.tfstate
-*.tfstate.backup
+*.tfstate.*
 *.tfplan
 tfplan
 .terraform.lock.hcl
